@@ -47,8 +47,17 @@ pub fn main() !void {
 
                     // Example:
                     // This hits the enter key after the window is focused
-                    // input.send_key_press(std.heap.page_allocator, &.{input.Keys.ENTER});
+                    // input.send_key_press(std.heap.page_allocator, &.{input.Keys.ENTER}) catch {};
+
+                    // For Roblox studio the default play key is F5
+                    input.send_key_press(std.heap.page_allocator, &.{input.Keys.F5}) catch {};
                 } else if (std.mem.eql(u8, key, Key2)) {
+
+                    // For Roblox studio the default stop key is F5 + shift
+                    input.send_key_press(std.heap.page_allocator, &.{
+                        input.Keys.left_shift,
+                        input.Keys.F5,
+                    }) catch {};
 
                     // Find and focus the second window
                     const SecondWindow = window.findAWindow(WindowTitle2) orelse {
@@ -62,7 +71,8 @@ pub fn main() !void {
 
                     // Example:
                     // This hits the enter key after the window is focused
-                    // input.send_key_press(std.heap.page_allocator, &.{input.Keys.ENTER});
+                    // input.send_key_press(std.heap.page_allocator, &.{input.Keys.ENTER}) catch {};
+
                 }
             }
         }.callback);
