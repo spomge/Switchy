@@ -4,11 +4,13 @@ const HWND = windows.HWND;
 const BOOL = windows.BOOL;
 const LPARAM = windows.LPARAM;
 
-extern "user32" fn GetWindowTextA(hWnd: ?HWND, lpString: [*:0]u8, nMaxCount: c_int) c_int;
-extern "user32" fn SetForegroundWindow(hWnd: ?HWND) BOOL;
-extern "user32" fn ShowWindow(hWnd: ?HWND, nCmdShow: c_int) BOOL;
 const WNDENUMPROC = *const fn (hWnd: ?HWND, lParam: LPARAM) BOOL;
-extern "user32" fn EnumWindows(lpEnumFunc: ?WNDENUMPROC, lParam: LPARAM) BOOL;
+const user32 = struct {
+    pub extern "user32" fn GetWindowTextA(hWnd: ?HWND, lpString: [*:0]u8, nMaxCount: c_int) c_int;
+    pub extern "user32" fn SetForegroundWindow(hWnd: ?HWND) BOOL;
+    pub extern "user32" fn ShowWindow(hWnd: ?HWND, nCmdShow: c_int) BOOL;
+    pub extern "user32" fn EnumWindows(lpEnumFunc: ?WNDENUMPROC, lParam: LPARAM) BOOL;
+};
 
 const EnumWindowsContext = struct {
     foundWindow: ?HWND,
@@ -18,7 +20,7 @@ const EnumWindowsContext = struct {
 fn enumWindowsProc(hWnd: ?HWND, lparam: LPARAM) BOOL {
     var title: [256:0]u8 = undefined;
 
-    _ = GetWindowTextA(hWnd, &title, @intCast(title.len));
+    _ = user32.GetWindowTextA(hWnd, &title, @intCast(title.len));
 
     const to_usize: usize = @intCast(lparam);
     const context: *EnumWindowsContext = @ptrFromInt(to_usize);
@@ -39,7 +41,15 @@ pub fn findAWindow(text: []const u8) ?HWND {
         .title = text,
     };
 
-    _ = EnumWindows(enumWindowsProc, @intCast(@intFromPtr(&context)));
+    _ = user32.EnumWindows(enumWindowsProc, @intCast(@intFromPtr(&context)));
 
     return context.foundWindow;
+}
+
+pub fn showWindow(hWnd: ?HWND) void {
+    _ = user32.ShowWindow(hWnd, 3);
+}
+
+pub fn setForegroundWindow(hWnd: ?HWND) void {
+    _ = user32.SetForegroundWindow(hWnd);
 }

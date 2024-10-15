@@ -1,41 +1,60 @@
 const std = @import("std");
 const windows = std.os.windows;
-const HWND = windows.HWND;
-const BOOL = windows.BOOL;
-const SW_SHOWMAXIMIZED = 3;
 
-extern "user32" fn SetForegroundWindow(hWnd: ?HWND) BOOL;
-extern "user32" fn ShowWindow(hWnd: ?HWND, nCmdShow: c_int) BOOL;
-
+// Import custom modules
 const input = @import("input.zig");
 const window = @import("window.zig");
+const args = @import("args.zig");
 
 pub fn main() !void {
-    const args = try std.process.argsAlloc(std.heap.page_allocator);
-    defer std.process.argsFree(std.heap.page_allocator, args);
+    // Get command line arguments
+    const commandLineArgs = args.getProcessArgs() orelse return error.FailedToGetArgs;
 
-    if (args.len != 3) {
-        std.debug.print("You gave me the wrong amount of arguments: {}\n", .{args.len});
-        std.debug.print("Usage: Switchy <window_title> <window_title>\n", .{});
-        return error.InvalidArgumentCount;
-    }
+    // Check if the arguments are valid
+    if (try args.checkArgs(commandLineArgs)) {
+        // Start listening for key inputs
+        try input.listen_for_key(struct {
+            fn callback(key: []const u8) void {
+                // Get fresh command line arguments
+                const commandLineArgs2 = args.getProcessArgs() orelse return;
 
-    try input.listen_for_key(struct {
-        fn callback(key: []const u8) void {
-            const args1 = std.process.argsAlloc(std.heap.page_allocator) catch return;
-            defer std.process.argsFree(std.heap.page_allocator, args1);
+                // Extract window titles and key bindings from arguments
+                const WindowTitle1 = commandLineArgs2[1];
+                const WindowTitle2 = commandLineArgs2[2];
+                const Key1 = commandLineArgs2[3];
+                const Key2 = commandLineArgs2[4];
 
-            if (std.mem.eql(u8, key, "F5")) {
-                input.send_key_press(std.heap.page_allocator, &[_]input.Keys{input.Keys.F5}) catch {};
-                const FirstWindow = window.findAWindow(args1[1]) orelse return;
-                _ = SetForegroundWindow(FirstWindow);
-                _ = ShowWindow(FirstWindow, SW_SHOWMAXIMIZED);
-            } else if (std.mem.eql(u8, key, "F4")) {
-                input.send_key_press(std.heap.page_allocator, &[_]input.Keys{ input.Keys.left_shift, input.Keys.F5 }) catch {};
-                const SecondWindow = window.findAWindow(args1[2]) orelse return;
-                _ = SetForegroundWindow(SecondWindow);
-                _ = ShowWindow(SecondWindow, SW_SHOWMAXIMIZED);
+                // Handle key presses
+                if (std.mem.eql(u8, key, Key1)) {
+                    // Find and focus the first window
+                    // IMPORTANT: This is necessary to make the window appear on top of other windows
+                    // Without it, the window will not be focused
+                    // You can change this to whatever you want (key press or mouse click)
+                    input.send_mouse_click(std.heap.page_allocator, 1920 / 2, 1080 / 2) catch {};
+
+                    const FirstWindow = window.findAWindow(WindowTitle1) orelse return;
+                    _ = window.showWindow(FirstWindow);
+                    _ = window.setForegroundWindow(FirstWindow);
+
+                    // If you want to do run a command after the window is focused, you can do it here
+
+                    // Example:
+                    // This hits the enter key after the window is focused
+                    // input.send_key_press(std.heap.page_allocator, &.{input.Keys.ENTER});
+                } else if (std.mem.eql(u8, key, Key2)) {
+
+                    // Find and focus the second window
+                    const SecondWindow = window.findAWindow(WindowTitle2) orelse return;
+                    _ = window.showWindow(SecondWindow);
+                    _ = window.setForegroundWindow(SecondWindow);
+
+                    // If you want to do run a command after the window is focused, you can do it here
+
+                    // Example:
+                    // This hits the enter key after the window is focused
+                    // input.send_key_press(std.heap.page_allocator, &.{input.Keys.ENTER});
+                }
             }
-        }
-    }.callback);
+        }.callback);
+    }
 }

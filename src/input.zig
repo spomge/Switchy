@@ -30,6 +30,7 @@ const user32 = struct {
     pub extern "user32" fn SendInput(nInputs: usize, pInputs: [*]const WINDOW_INPUT_STRUCT, cbSize: c_int) u32;
     pub extern "user32" fn SetWindowsHookExA(idHook: i32, lpfn: ?*const anyopaque, hmod: ?windows.HMODULE, dwThreadId: DWORD) callconv(WINAPI) windows.LRESULT;
     pub extern "user32" fn CallNextHookEx(hhk: windows.LRESULT, nCode: i32, wParam: WPARAM, lParam: LPARAM) callconv(WINAPI) windows.LRESULT;
+    pub extern "user32" fn UnhookWindowsHookEx(hHook: windows.LRESULT) BOOL;
     pub extern "user32" fn GetMessageW(lpMsg: ?*MSG, hwnd: ?HWND, wMsgFilterMin: u32, wMsgFilterMax: u32) callconv(WINAPI) windows.LRESULT;
 };
 
@@ -187,6 +188,23 @@ pub fn stringToKey(str: []const u8) !Keys {
     return stringToKeys.get(str).?;
 }
 
+pub fn send_mouse_click(allocator: std.mem.Allocator, x: i32, y: i32) !void {
+    var mouse_codes = std.ArrayList(WINDOW_INPUT_STRUCT).init(allocator);
+
+    try mouse_codes.append(.{
+        .type = @intFromEnum(INPUT_TYPE.MOUSE),
+        .u = .{ .mi = .{
+            .dx = x,
+            .dy = y,
+            .mouseData = 0,
+            .dwFlags = 0,
+            .time = 0,
+            .dwExtraInfo = 0,
+        } },
+    });
+    _ = user32.SendInput(@intCast(2), mouse_codes.items.ptr, @sizeOf(WINDOW_INPUT_STRUCT));
+}
+
 pub fn send_key_press(allocator: std.mem.Allocator, keys: []const Keys) !void {
     var key_codes = std.ArrayList(WINDOW_INPUT_STRUCT).init(allocator);
     defer key_codes.deinit();
@@ -221,7 +239,7 @@ pub fn send_key_press(allocator: std.mem.Allocator, keys: []const Keys) !void {
 }
 
 pub fn listen_for_key(callback: fn (key: []const u8) void) !void {
-    const keyboard_hook_proc = struct {
+    const hKeyboardHook = user32.SetWindowsHookExA(LISTEN_FOR_KEYINPUT, struct {
         pub fn func(nCode: c_int, wParam: WPARAM, lParam: LPARAM) windows.LRESULT {
             if (nCode == 0) {
                 if (wParam == 0x100) {
@@ -236,14 +254,13 @@ pub fn listen_for_key(callback: fn (key: []const u8) void) !void {
             }
             return user32.CallNextHookEx(LISTEN_FOR_KEYINPUT, nCode, wParam, lParam);
         }
-    }.func;
-
-    const hKeyboardHook = user32.SetWindowsHookExA(LISTEN_FOR_KEYINPUT, keyboard_hook_proc, null, 0);
+    }.func, null, 0);
     if (hKeyboardHook == 0) {
         return error.FailedToSetKeyboardHook;
     }
 
     std.debug.print("Listening\n", .{});
+    defer _ = user32.UnhookWindowsHookEx(hKeyboardHook);
     var msg: MSG = undefined;
     while (user32.GetMessageW(&msg, null, 0, 0) != 0) {}
 }
