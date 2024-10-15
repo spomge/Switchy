@@ -10,6 +10,10 @@ pub fn main() !void {
     // Get command line arguments
     const commandLineArgs = args.getProcessArgs() orelse return error.FailedToGetArgs;
 
+    // Check if the windows are open
+    _ = window.findAWindow(commandLineArgs[1]) orelse return error.WindowNotFound;
+    _ = window.findAWindow(commandLineArgs[2]) orelse return error.WindowNotFound;
+
     // Check if the arguments are valid
     if (try args.checkArgs(commandLineArgs)) {
         // Start listening for key inputs
@@ -32,7 +36,10 @@ pub fn main() !void {
                     // You can change this to whatever you want (key press or mouse click)
                     input.send_mouse_click(std.heap.page_allocator, 1920 / 2, 1080 / 2) catch {};
 
-                    const FirstWindow = window.findAWindow(WindowTitle1) orelse return;
+                    const FirstWindow = window.findAWindow(WindowTitle1) orelse {
+                        std.debug.print("Window 1 is no longer open\n", .{});
+                        return;
+                    };
                     _ = window.showWindow(FirstWindow);
                     _ = window.setForegroundWindow(FirstWindow);
 
@@ -44,7 +51,10 @@ pub fn main() !void {
                 } else if (std.mem.eql(u8, key, Key2)) {
 
                     // Find and focus the second window
-                    const SecondWindow = window.findAWindow(WindowTitle2) orelse return;
+                    const SecondWindow = window.findAWindow(WindowTitle2) orelse {
+                        std.debug.print("Window 2 is no longer open\n", .{});
+                        return;
+                    };
                     _ = window.showWindow(SecondWindow);
                     _ = window.setForegroundWindow(SecondWindow);
 
