@@ -19,6 +19,9 @@ A fast way to switch tabs!
 - Build the project: 
     To build the project all you need to do is run `zig build` from the root of the project!
 
-- Run the project:
-    After building the project you can run it by running `zig build run` from the root of the project!
+- Example Usage
+   ```
+   zig build run -- "Discord" "Google" "F5" "F4"
+   ```
+   This listens for F5 and switchs to discord and on F4 it switches to Google
     
