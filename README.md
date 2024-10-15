@@ -6,10 +6,10 @@ Switchy emulates native Roblox Studio functionality of Play/Stop keybindings wit
 ## Key Features
 
 - **Run Your Game Instantly**  
-  Press `F5` to run your game and switch tabs to Roblox Studio.
+  Press ANY key to run your game and switch tabs to Roblox Studio.
   
 - **Return to Scripting with Ease**  
-  Press `F4` to stop the game and immediately switch back to your Code Editor for scripting.
+  Press ANY key to stop the game and immediately switch back to your Code Editor for scripting.
 
 
 > [!CAUTION]
@@ -39,12 +39,12 @@ Switchy emulates native Roblox Studio functionality of Play/Stop keybindings wit
 
 - Usage Syntax
   ```
-   zig build run -- "[Roblox Studio Window Title]" "[Visual Studio Code / Cursor]"
+   zig build run -- "[Roblox Studio Window Title]" "[Visual Studio Code / Cursor]" "[Key to siwtch to Roblox Studio]" "[Key to switch to Visual Studio Code / Cursor]"
    ```
 
 - Example Usage
    ```
-   zig build run -- "MyGame - Roblox Studio" "Visual Studio Code"
+   zig build run -- "MyGame - Roblox Studio" "Visual Studio Code" "F5" "F4"
    ```
    This listens for F5 and switchs to discord and on F4 it switches to Google
     
