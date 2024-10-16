@@ -190,6 +190,7 @@ pub fn stringToKey(str: []const u8) !Keys {
 
 pub fn send_mouse_click(allocator: std.mem.Allocator, x: i32, y: i32) !void {
     var mouse_codes = std.ArrayList(WINDOW_INPUT_STRUCT).init(allocator);
+    defer mouse_codes.deinit();
 
     try mouse_codes.append(.{
         .type = @intFromEnum(INPUT_TYPE.MOUSE),
@@ -258,9 +259,9 @@ pub fn listen_for_key(callback: fn (key: []const u8) void) !void {
     if (hKeyboardHook == 0) {
         return error.FailedToSetKeyboardHook;
     }
+    defer _ = user32.UnhookWindowsHookEx(hKeyboardHook);
 
     std.debug.print("Listening\n", .{});
-    defer _ = user32.UnhookWindowsHookEx(hKeyboardHook);
     var msg: MSG = undefined;
     while (user32.GetMessageW(&msg, null, 0, 0) != 0) {}
 }
