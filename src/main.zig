@@ -10,9 +10,12 @@ pub fn main() !void {
     // Get command line arguments
     const commandLineArgs = args.getProcessArgs() orelse return error.FailedToGetArgs;
 
+    //checks if the user has entered the correct number of arguments
+    _ = try args.checkArgs(commandLineArgs);
+
     // Check if the windows are open
-    _ = window.findAWindow(commandLineArgs[1]) orelse return error.WindowNotFound;
-    _ = window.findAWindow(commandLineArgs[2]) orelse return error.WindowNotFound;
+    _ = window.findAWindow(commandLineArgs[1]) orelse return error.WindowNotFound1;
+    _ = window.findAWindow(commandLineArgs[2]) orelse return error.WindowNotFound2;
 
     // Check if the arguments are valid
     if (try args.checkArgs(commandLineArgs)) {
