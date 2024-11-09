@@ -10,12 +10,34 @@ pub fn main() !void {
     // Get command line arguments
     const commandLineArgs = args.getProcessArgs() orelse return error.FailedToGetArgs;
 
+    if (std.mem.eql(u8, commandLineArgs[1], "-v")) {
+        std.debug.print("Switchy v0.1.2\n", .{});
+        return;
+    }
+    if (std.mem.eql(u8, commandLineArgs[1], "-args")) {
+        for (commandLineArgs) |arg| {
+            std.debug.print("arg: {s}\n", .{arg});
+        }
+        return;
+    }
+
     //checks if the user has entered the correct number of arguments
     _ = try args.checkArgs(commandLineArgs);
 
     // Check if the windows are open
-    _ = window.findAWindow(commandLineArgs[1]) orelse return error.WindowNotFound1;
+    _ = window.findAWindow(commandLineArgs[1]) orelse {
+        std.debug.print("window1: {s}", .{commandLineArgs[1]});
+        return error.WindowNotFound1;
+    };
     _ = window.findAWindow(commandLineArgs[2]) orelse return error.WindowNotFound2;
+
+    // checks if valid inputs
+    _ = if (input.stringToKey(commandLineArgs[3]) == null) {
+        return error.InvalidKey1;
+    };
+    _ = if (input.stringToKey(commandLineArgs[4]) == null) {
+        return error.InvalidKey2;
+    };
 
     // Check if the arguments are valid
     if (try args.checkArgs(commandLineArgs)) {

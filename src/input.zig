@@ -184,8 +184,8 @@ const WINDOW_INPUT_STRUCT = extern struct {
     },
 };
 
-pub fn stringToKey(str: []const u8) !Keys {
-    return stringToKeys.get(str).?;
+pub fn stringToKey(str: []const u8) ?Keys {
+    return stringToKeys.get(str);
 }
 
 pub fn send_mouse_click(allocator: std.mem.Allocator, x: i32, y: i32) !void {
