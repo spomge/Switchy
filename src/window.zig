@@ -47,7 +47,7 @@ pub fn findAWindow(text: []const u8) ?HWND {
 }
 
 pub fn showWindow(hWnd: ?HWND) void {
-    _ = user32.ShowWindow(hWnd, 3);
+    _ = user32.ShowWindow(hWnd, 5);
 }
 
 pub fn setForegroundWindow(hWnd: ?HWND) void {

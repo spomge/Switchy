@@ -13,6 +13,7 @@ Switchy emulates native Roblox Studio functionality of Play/Stop keybindings wit
 
 > [!CAUTION]
 > Switchy is only available on Windows operating systems at this time.
+> This was built using Zig Version 0.13.0
 > Switchy is currently in the early stages of development!
 
 ## Why Use Switchy?
